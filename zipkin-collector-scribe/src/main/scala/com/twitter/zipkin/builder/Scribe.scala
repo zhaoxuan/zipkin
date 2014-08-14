@@ -38,7 +38,7 @@ object Scribe {
    */
   object Interface {
     def apply(categories: Set[String] = Set("zipkin")) = {
-      type T = Seq[String]
+      type T = Seq[Seq[String]]
       new CollectorInterface[T] {
         val filter = new ScribeFilter
 

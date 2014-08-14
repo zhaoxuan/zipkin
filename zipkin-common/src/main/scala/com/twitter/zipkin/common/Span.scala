@@ -188,4 +188,10 @@ case class Span(traceId: Long, name: String, id: Long, parentId: Option[Long],
    * Get the annotations as a map with value to annotation bindings.
    */
   def getAnnotationsAsMap(): Map[String, Annotation] = annotations.map{ a => a.value -> a}.toMap
+
+  def plusServiceNamePrefix(prefix: String) = {
+    this.copy(annotations = this.annotations.map(_.plusServiceNamePrefix(prefix)),
+              binaryAnnotations = this.binaryAnnotations.map(_.plusServiceNamePrefix(prefix))
+    )
+  }
 }
