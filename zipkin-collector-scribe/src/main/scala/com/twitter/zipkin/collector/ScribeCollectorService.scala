@@ -65,7 +65,12 @@ class ScribeCollectorService(
           None
         } else {
           Stats.incr("category." + category)
-          Some(Seq(category.substring("Zipkin".length() + 1), entry.`message`))
+
+          if (category.length == "zipkin".length) {
+            Some(Seq("", entry.`message`))
+          } else {
+            Some(Seq(category.substring("Zipkin".length() + 1), entry.`message`))
+          }
         }
     }
 

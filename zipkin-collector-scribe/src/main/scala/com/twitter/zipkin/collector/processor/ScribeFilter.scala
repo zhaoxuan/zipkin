@@ -52,7 +52,9 @@ class ScribeFilter extends Filter[Seq[Seq[String]], Unit, Span, Unit] {
           }
           log.ifDebug("Processing span: " + span.toSpan + " from " + msg)
           val spanStruct = span.toSpan
-          service(spanStruct.plusServiceNamePrefix(category + ":"))
+          service(spanStruct.plusServiceNamePrefix(category match {
+            case "" => ""
+            case s: String => s + ":" }))
           //service(span.toSpan)
         } catch {
           case e: Exception => {
