@@ -61,6 +61,7 @@ object QueryExtractor {
     val spanName = req.params.get("spanName") filterNot { n => n == "all" || n == "" }
 
     val timestamp = getTimestamp(req).getOrElse(Time.now.inMicroseconds)
+    val startTs = req.params.get("startTs").getOrElse(0)
 
     val (annotations, binaryAnnotations) = req.params.get("annotationQuery") map { query =>
       var anns = Seq.empty[String]
@@ -87,6 +88,6 @@ object QueryExtractor {
     // traces are ordered in the UI itself. Using None means the query service wont lookup durations
     val order = Order.None
     val limit = req.params.get("limit").map(_.toInt).getOrElse(Constants.DefaultQueryLimit)
-    QueryRequest(serviceName, spanName, annotations, binaryAnnotations, timestamp, limit, order)
+    QueryRequest(serviceName, spanName, annotations, binaryAnnotations, timestamp, limit, order, startTs)
   }
 }
