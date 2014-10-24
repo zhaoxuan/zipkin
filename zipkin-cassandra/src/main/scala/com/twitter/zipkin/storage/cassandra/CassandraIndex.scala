@@ -141,6 +141,8 @@ case class CassandraIndex(
     CASSANDRA_GET_TRACE_IDS_BY_NAME.incr
     // if we have a span name, look up in the service + span name index
     // if not, look up by service name only
+
+    // use startTs to query limit
     val start_ts = startTs match {
       case 0 => None
       case _ => Some(startTs)
@@ -167,6 +169,13 @@ case class CassandraIndex(
   def getTraceIdsByAnnotation(service: String, annotation: String, value: Option[ByteBuffer],
                               endTs: Long, limit: Int, startTs: Long): Future[Seq[IndexedTraceId]] = {
     CASSANDRA_GET_TRACE_IDS_BY_ANN.incr
+
+    // use startTs to query limit
+    val start_ts = startTs match {
+      case 0 => None
+      case _ => Some(startTs)
+    }
+
     val row = value match {
       case Some(v) => {
         val key = ByteBuffer.wrap(encode(service, annotation).getBytes ++ INDEX_DELIMITER.getBytes ++ Util.getArrayFromBuffer(v))
