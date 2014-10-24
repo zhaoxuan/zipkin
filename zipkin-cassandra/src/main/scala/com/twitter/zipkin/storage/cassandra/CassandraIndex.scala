@@ -179,11 +179,11 @@ case class CassandraIndex(
     val row = value match {
       case Some(v) => {
         val key = ByteBuffer.wrap(encode(service, annotation).getBytes ++ INDEX_DELIMITER.getBytes ++ Util.getArrayFromBuffer(v))
-        annotationsIndex.getRowSlice(key, Some(endTs), None, limit, Order.Reversed)
+        annotationsIndex.getRowSlice(key, Some(endTs), start_ts, limit, Order.Reversed)
       }
       case None =>
         val key = ByteBuffer.wrap(encode(service, annotation.toLowerCase).getBytes)
-        annotationsIndex.getRowSlice(key, Some(endTs), None, limit, Order.Reversed)
+        annotationsIndex.getRowSlice(key, Some(endTs), start_ts, limit, Order.Reversed)
     }
 
     row map {
