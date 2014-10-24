@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import com.twitter.logging._
-import com.twitter.zipkin.builder.{ZipkinServerBuilder, QueryServiceBuilder}
+//import com.twitter.logging._
+import com.twitter.zipkin.builder.QueryServiceBuilder
 import com.twitter.zipkin.cassandra
 import com.twitter.zipkin.storage.Store
 
 
-val loggers = List(LoggerFactory(level = Some(Level.INFO),
-  handlers = List(FileHandler(filename = "./logs/zipkin-query.log",
-    rollPolicy = Policy.Daily,
-    append = true,
-    formatter = BareFormatter))))
+//val loggers = List(LoggerFactory(level = Some(Level.INFO),
+//  handlers = List(FileHandler(filename = "./logs/zipkin-query.log",
+//    rollPolicy = Policy.Daily,
+//    append = true,
+//    formatter = BareFormatter))))
 
 // development mode.
 val keyspaceBuilder = cassandra.Keyspace.static()
@@ -33,4 +33,4 @@ val storeBuilder = Store.Builder(
   cassandra.IndexBuilder(keyspaceBuilder),
   cassandra.AggregatesBuilder(keyspaceBuilder))
 
-QueryServiceBuilder(storeBuilder).copy(serverBuilder = ZipkinServerBuilder(9411, 9901).loggers(loggers))
+QueryServiceBuilder(storeBuilder)
