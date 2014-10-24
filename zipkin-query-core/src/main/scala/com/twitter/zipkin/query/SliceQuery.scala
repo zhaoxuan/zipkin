@@ -23,13 +23,13 @@ import java.nio.ByteBuffer
 sealed trait SliceQuery {
   def execute(index: Index): Future[Seq[IndexedTraceId]]
 }
-case class SpanSliceQuery(serviceName: String, spanName: String, endTs: Long, limit: Int) extends SliceQuery {
+case class SpanSliceQuery(serviceName: String, spanName: String, endTs: Long, limit: Int, startTs: Long) extends SliceQuery {
   def execute(index: Index) = {
-    index.getTraceIdsByName(serviceName, Some(spanName), endTs, limit)
+    index.getTraceIdsByName(serviceName, Some(spanName), endTs, limit, startTs)
   }
 }
-case class AnnotationSliceQuery(serviceName: String, key: String, value: Option[ByteBuffer], endTs: Long, limit: Int) extends SliceQuery {
+case class AnnotationSliceQuery(serviceName: String, key: String, value: Option[ByteBuffer], endTs: Long, limit: Int, startTs: Long) extends SliceQuery {
   def execute(index: Index) = {
-    index.getTraceIdsByAnnotation(serviceName, key, value, endTs, limit)
+    index.getTraceIdsByAnnotation(serviceName, key, value, endTs, limit, startTs)
   }
 }

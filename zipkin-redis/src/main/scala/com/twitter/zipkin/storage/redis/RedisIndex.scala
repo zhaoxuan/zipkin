@@ -82,7 +82,7 @@ trait RedisIndex extends Index {
   private[redis] def redisJoin(items: String*) = items.mkString(":")
 
   override def getTraceIdsByName(serviceName: String, span: Option[String],
-    endTs: Long, limit: Int): Future[Seq[IndexedTraceId]] =
+    endTs: Long, limit: Int, startTs: Long): Future[Seq[IndexedTraceId]] =
     serviceSpanMap.get(
       serviceName,
       span,
@@ -91,7 +91,7 @@ trait RedisIndex extends Index {
       limit) map zRangeResultsToSeqIds
 
   override def getTraceIdsByAnnotation(serviceName: String, annotation: String, value: Option[ByteBuffer],
-    endTs: Long, limit: Int): Future[Seq[IndexedTraceId]] = (value match {
+    endTs: Long, limit: Int, startTs: Long): Future[Seq[IndexedTraceId]] = (value match {
       case Some(anno) =>
         binaryAnnotationsListMap.get(
           redisJoin(serviceName, annotation, ChannelBuffers.copiedBuffer(anno)),

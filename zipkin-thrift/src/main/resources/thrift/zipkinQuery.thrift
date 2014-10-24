@@ -82,6 +82,7 @@ enum Order { TIMESTAMP_DESC, TIMESTAMP_ASC, DURATION_ASC, DURATION_DESC, NONE }
  */
 enum Adjust { NOTHING, TIME_SKEW }
 
+//   add start_ts
 struct QueryRequest {
   1: string service_name
   2: optional string span_name
@@ -90,6 +91,7 @@ struct QueryRequest {
   5: i64 end_ts
   6: i32 limit
   7: Order order
+  8: i64 start_ts
 }
 
 struct QueryResponse {
@@ -112,7 +114,7 @@ service ZipkinQuery {
      * Timestamps are in microseconds.
      */
     list<i64> getTraceIdsBySpanName(1: string service_name, 2: string span_name,
-        4: i64 end_ts, 5: i32 limit, 6: Order order) throws (1: QueryException qe);
+        4: i64 end_ts, 5: i32 limit, 6: Order order, 7: i64 start_ts) throws (1: QueryException qe);
 
     /**
      * Fetch trace ids by service name.
@@ -121,7 +123,7 @@ service ZipkinQuery {
      * Timestamps are in microseconds.
      */
     list<i64> getTraceIdsByServiceName(1: string service_name,
-        3: i64 end_ts, 4: i32 limit, 5: Order order) throws (1: QueryException qe);
+        3: i64 end_ts, 4: i32 limit, 5: Order order, 6: i64 start_ts) throws (1: QueryException qe);
 
     /**
      * Fetch trace ids with a particular annotation.
@@ -134,7 +136,7 @@ service ZipkinQuery {
      * Timestamps are in microseconds.
      */
     list<i64> getTraceIdsByAnnotation(1: string service_name, 2: string annotation, 3: binary value,
-        5: i64 end_ts, 6: i32 limit, 7: Order order) throws (1: QueryException qe);
+        5: i64 end_ts, 6: i32 limit, 7: Order order, 8: i64 start_ts) throws (1: QueryException qe);
 
 
     //************** Fetch traces from id **************

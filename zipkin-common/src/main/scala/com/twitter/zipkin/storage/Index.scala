@@ -40,7 +40,7 @@ trait Index {
    * Only return maximum of limit trace ids from before the endTs.
    */
   def getTraceIdsByName(serviceName: String, spanName: Option[String],
-                        endTs: Long, limit: Int): Future[Seq[IndexedTraceId]]
+                        endTs: Long, limit: Int, startTs: Long): Future[Seq[IndexedTraceId]]
 
   /**
    * Get the trace ids for this annotation between the two timestamps. If value is also passed we expect
@@ -48,7 +48,7 @@ trait Index {
    * Only return maximum of limit trace ids from before the endTs.
    */
   def getTraceIdsByAnnotation(serviceName: String, annotation: String, value: Option[ByteBuffer],
-                              endTs: Long, limit: Int): Future[Seq[IndexedTraceId]]
+                              endTs: Long, limit: Int, startTs: Long): Future[Seq[IndexedTraceId]]
 
   /**
    * Fetch the duration or an estimate thereof from the traces.

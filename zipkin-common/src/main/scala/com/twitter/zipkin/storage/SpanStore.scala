@@ -15,12 +15,14 @@
  */
 package com.twitter.zipkin.storage
 
+import java.nio.ByteBuffer
+
 import com.twitter.conversions.time._
-import com.twitter.finagle.{Filter => FFilter, Service}
+import com.twitter.finagle.{Filter => FFilter}
 import com.twitter.util.{Closable, CloseAwaitably, Duration, Future, Time}
 import com.twitter.zipkin.Constants
 import com.twitter.zipkin.common.Span
-import java.nio.ByteBuffer
+
 import scala.collection.mutable
 
 trait SpanStore extends WriteSpanStore with ReadSpanStore
@@ -92,7 +94,8 @@ trait ReadSpanStore {
     serviceName: String,
     spanName: Option[String],
     endTs: Long,
-    limit: Int
+    limit: Int,
+    startTs: Long = 0
   ): Future[Seq[IndexedTraceId]]
 
   /**
@@ -105,7 +108,8 @@ trait ReadSpanStore {
     annotation: String,
     value: Option[ByteBuffer],
     endTs: Long,
-    limit: Int
+    limit: Int,
+    startTs: Long = 0
   ): Future[Seq[IndexedTraceId]]
 
   /**
@@ -173,7 +177,8 @@ class InMemorySpanStore extends SpanStore {
     serviceName: String,
     spanName: Option[String],
     endTs: Long,
-    limit: Int
+    limit: Int,
+    startTs: Long
   ): Future[Seq[IndexedTraceId]] = call {
     ((spanName, spansForService(serviceName)) match {
       case (Some(name), spans) =>
@@ -185,6 +190,12 @@ class InMemorySpanStore extends SpanStore {
         case Some(ann) => ann.timestamp <= endTs
         case None => false
       }
+    } filter { span =>
+      span.firstAnnotation match {
+        case Some(ann) => ann.timestamp >= startTs
+        case None => false
+      }
+
     } filter(shouldIndex) take(limit) map { span =>
       IndexedTraceId(span.traceId, span.lastAnnotation.get.timestamp)
     } toList
@@ -195,19 +206,24 @@ class InMemorySpanStore extends SpanStore {
     annotation: String,
     value: Option[ByteBuffer],
     endTs: Long,
-    limit: Int
+    limit: Int,
+    startTs: Long
   ): Future[Seq[IndexedTraceId]] = call {
     // simulate the lack of index for core annotations
     if (Constants.CoreAnnotations.contains(annotation)) Seq.empty else {
       ((value, spansForService(serviceName)) match {
         case (Some(v), spans) =>
           spans filter { span =>
+            span.firstAnnotation.isDefined &&
+            span.firstAnnotation.get.timestamp >= startTs &&
             span.lastAnnotation.isDefined &&
             span.lastAnnotation.get.timestamp <= endTs &&
             span.binaryAnnotations.exists { ba => ba.key == annotation && ba.value == v }
           }
         case (_, spans) =>
           spans filter { span =>
+            span.firstAnnotation.isDefined &&
+            span.firstAnnotation.get.timestamp >= startTs &&
             span.lastAnnotation.isDefined &&
             span.annotations.min.timestamp <= endTs &&
             span.annotations.exists { _.value == annotation }
