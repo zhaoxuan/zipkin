@@ -211,8 +211,8 @@ class QueryService(
   def getTraceIdsBySpanName(serviceName: String, spanName: String, endTs: Long,
                         limit: Int, order: gen.Order, startTs: Long): Future[Seq[Long]] = {
     val method = "getTraceIdsBySpanName"
-    log.debug("%s. serviceName: %s spanName: %s endTs: %s limit: %s order: %s".format(method, serviceName, spanName,
-      endTs, limit, order))
+    log.debug("%s. serviceName: %s spanName: %s endTs: %s limit: %s order: %s startTs: %s".format(method, serviceName, spanName,
+      endTs, limit, order, startTs))
     call(method) {
       if (serviceName == null || "".equals(serviceName)) {
         errorStats.counter("%s_no_service".format(method)).incr()
