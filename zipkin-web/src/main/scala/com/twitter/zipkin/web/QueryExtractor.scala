@@ -61,7 +61,10 @@ object QueryExtractor {
     val spanName = req.params.get("spanName") filterNot { n => n == "all" || n == "" }
 
     val timestamp = getTimestamp(req).getOrElse(Time.now.inMicroseconds)
-    val startTs = req.params.get("startTs").getOrElse(0)
+    val startTs = req.params.get("startTs").map(_.toLong) match {
+      case Some(a) => a.toLong
+      case _ => 0
+	}
 
     val (annotations, binaryAnnotations) = req.params.get("annotationQuery") map { query =>
       var anns = Seq.empty[String]
