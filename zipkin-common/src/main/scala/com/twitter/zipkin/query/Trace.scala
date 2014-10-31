@@ -71,8 +71,6 @@ case class Trace(private val s: Seq[Span]) {
   lazy val getRootMostSpan: Option[Span] = {
     getRootSpan orElse {
       val idSpan = getIdToSpanMap
-      println("idSpan => " + idSpan)
-      println("Spans => " + spans)
       //spans.headOption map { recursiveGetRootMostSpan(idSpan, _) }
       spans.headOption map { loopGetRootMostSpan(idSpan, _) }
     }
@@ -85,7 +83,6 @@ case class Trace(private val s: Seq[Span]) {
     // parent id shouldn't be none as then we would have returned already
     val span = for ( id <- prevSpan.parentId; s <- idSpan.get(id) ) yield
       recursiveGetRootMostSpan(idSpan, s)
-    println("------\n" + span + "\n-------")
     span.getOrElse(prevSpan)
   }
 
@@ -93,19 +90,16 @@ case class Trace(private val s: Seq[Span]) {
     //TODO
     val checkedSpan: mutable.Set[Long] = mutable.Set()
     val maxLoop: Int = 3
-    println("MaxLoop: " + maxLoop)
+
     for(i <- 1 to maxLoop) {
       checkedSpan += curSpan.id
-      println("Now checkedSpan: " + checkedSpan)
 
       if (checkedSpan.contains(curSpan.parentId.getOrElse(0))) {
         println("Loop found!")
         return curSpan
       }
 
-
     }
-    println("Finally find rootMost span: " + curSpan)
     curSpan
   }
 
