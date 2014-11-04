@@ -14,6 +14,7 @@ class KafkaService(
                     kafka: Producer[String, String],
                     topic: String
                     ) extends Service[Span, Unit] {
+
   def apply(data: Span): Future[Unit] = {
     val producerData = new ProducerData[String, String](topic, Seq("123"))
 
@@ -22,6 +23,6 @@ class KafkaService(
 //    } onSuccess { (_) =>
 //      println("send to kafka success")
 //    }
-    Future(Unit)
+    Future.Unit
   }
 }

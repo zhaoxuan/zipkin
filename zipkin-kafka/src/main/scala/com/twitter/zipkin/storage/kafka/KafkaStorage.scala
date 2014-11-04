@@ -5,11 +5,11 @@ import com.twitter.zipkin.storage.Storage
 import com.twitter.util.Future
 import com.twitter.util.Duration
 import kafka.producer.Producer
-import com.twitter.zipkin.{kafka => bKafka}
 
 /**
  * Created by john on 11/3/14.
  */
+
 trait KafkaStorage extends Storage {
   val producer: Producer[String, String]
 
@@ -18,11 +18,13 @@ trait KafkaStorage extends Storage {
   override def storeSpan(span: Span): Future[Unit] = {
     println(producer)
     println("output span into kafka")
-    Future(Unit)
+//    TODO:john
+//    send span to kafka
+    Future.Unit
   }
 
   override def setTimeToLive(traceId: Long, ttl: Duration): Future[Unit] = {
-    Future(Unit)
+    Future.Unit
   }
 
   override def getTimeToLive(traceId: Long): Future[Duration] = {

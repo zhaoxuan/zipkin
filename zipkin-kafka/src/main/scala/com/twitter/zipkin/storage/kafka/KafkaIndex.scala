@@ -30,13 +30,13 @@ trait KafkaIndex extends Index {
 
   override def getSpanNames(service: String): Future[Set[String]] = Future(Set.empty[String])
 
-  override def indexTraceIdByServiceAndName(span: Span) : Future[Unit] = Future(Unit)
+  override def indexTraceIdByServiceAndName(span: Span) : Future[Unit] = Future.Unit
 
-  override def indexSpanByAnnotations(span: Span) : Future[Unit] = Future(Unit)
+  override def indexSpanByAnnotations(span: Span) : Future[Unit] = Future.Unit
 
-  override def indexServiceName(span: Span) : Future[Unit] = Future(Unit)
+  override def indexServiceName(span: Span) : Future[Unit] = Future.Unit
 
-  override def indexSpanNameByService(span: Span) : Future[Unit] = Future(Unit)
+  override def indexSpanNameByService(span: Span) : Future[Unit] = Future.Unit
 
-  override def indexSpanDuration(span: Span): Future[Unit] = Future(Unit)
+  override def indexSpanDuration(span: Span): Future[Unit] = Future.Unit
 }

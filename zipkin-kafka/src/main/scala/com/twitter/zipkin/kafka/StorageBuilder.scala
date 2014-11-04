@@ -6,6 +6,7 @@ import com.twitter.zipkin.builder.Builder
 import com.twitter.zipkin.storage.Storage
 import com.twitter.zipkin.storage.kafka.KafkaStorage
 import kafka.producer.{Producer, ProducerConfig}
+import com.twitter.zipkin.{kafka => outKafka}
 
 /**
  * Created by john on 11/3/14.
@@ -17,15 +18,17 @@ case class StorageBuilder(
 ) extends Builder[Storage] { self =>
 
   def apply() = {
+    val kafkaBroker = "%s:%d".format(host, port)
 
-    val zkConnectString = host + ":" + port.toString
     val properties = new Properties
-    properties.put("zk.connect", zkConnectString)
-    properties.put("producer.type", "sync")
+    properties.put("metadata.broker.list", kafkaBroker)
+    properties.put("producer.type", "async")
+
     val producerConfig = new ProducerConfig(properties)
 
     val producerClient = new Producer[String, String](producerConfig)
-    //  new bKafka.KafkaService(producer, topic)
+    new outKafka.KafkaService(producerClient, topic)
+
     new KafkaStorage {
       val producer = producerClient
     }
