@@ -1,37 +1,22 @@
 package com.twitter.zipkin.storage.kafka
 
-import java.util.Properties
-
-import com.twitter.finagle.stats.{NullStatsReceiver, StatsReceiver}
 import com.twitter.zipkin.common.Span
 import com.twitter.zipkin.storage.Storage
 import com.twitter.util.Future
 import com.twitter.util.Duration
 import kafka.producer.Producer
-import kafka.producer.ProducerConfig
 import com.twitter.zipkin.{kafka => bKafka}
 
 /**
  * Created by john on 11/3/14.
  */
 trait KafkaStorage extends Storage {
-  val host: String
-  val port: Int
-  val topic: String
-  var statsReceiver: StatsReceiver = NullStatsReceiver
-
-  val zkConnectString = host + ":" + port.toString
-  val properties = new Properties
-  properties.put("zk.connect", zkConnectString)
-  properties.put("producer.type", "sync")
-  val producerConfig = new ProducerConfig(properties)
-
-  val producer = new Producer[String, String](producerConfig)
-  new bKafka.KafkaService(producer, topic)
+  val producer: Producer[String, String]
 
   override def close() = {}
 
   override def storeSpan(span: Span): Future[Unit] = {
+    println(producer)
     println("output span into kafka")
     Future(Unit)
   }
