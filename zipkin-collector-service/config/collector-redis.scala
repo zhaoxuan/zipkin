@@ -17,6 +17,7 @@ import com.twitter.zipkin.builder.Scribe
 import com.twitter.zipkin.redis
 import com.twitter.zipkin.collector.builder.CollectorServiceBuilder
 import com.twitter.zipkin.storage.Store
+import com.twitter.zipkin.kafka
 
 
 val redisBuilder = Store.Builder(
@@ -24,5 +25,12 @@ val redisBuilder = Store.Builder(
     redis.IndexBuilder("0.0.0.0", 6379)
 )
 
+val kafkaBuilder = Store.Builder(
+  kafka.StorageBuilder("10.26.107.44", 2181, "topic"),
+  kafka.IndexBuilder()
+)
+
+
+
 CollectorServiceBuilder(Scribe.Interface(categories = Set("zipkin")))
-  .writeTo(redisBuilder)
+  .writeTo(redisBuilder).writeTo(kafkaBuilder)
