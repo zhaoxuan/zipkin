@@ -367,7 +367,8 @@ class CassieSpanStore(
     serviceName: String,
     spanName: Option[String],
     endTs: Long,
-    limit: Int
+    limit: Int,
+    startTs: Long
   ): Future[Seq[IndexedTraceId]] = {
     QueryGetTraceIdsByNameCounter.incr()
     val key = nameKey(serviceName, spanName)
@@ -385,7 +386,8 @@ class CassieSpanStore(
     annotation: String,
     value: Option[ByteBuffer],
     endTs: Long,
-    limit: Int
+    limit: Int,
+    startTs: Long
   ): Future[Seq[IndexedTraceId]] = {
     QueryGetTraceIdsByAnnotationCounter.incr()
     val key = annotationKey(serviceName, annotation, value)

@@ -15,10 +15,11 @@
  */
 package com.twitter.zipkin.query
 
-import com.twitter.finagle.tracing.{Trace => FTrace}
-import com.twitter.logging.Logger
-import com.twitter.zipkin.common.{BinaryAnnotation, Endpoint, Span}
 import java.nio.ByteBuffer
+
+import com.twitter.finagle.tracing.{Trace => FTrace}
+import com.twitter.zipkin.common.{BinaryAnnotation, Endpoint, Span}
+
 import scala.collection.mutable
 
 /**
@@ -70,7 +71,8 @@ case class Trace(private val s: Seq[Span]) {
   lazy val getRootMostSpan: Option[Span] = {
     getRootSpan orElse {
       val idSpan = getIdToSpanMap
-      spans.headOption map { recursiveGetRootMostSpan(idSpan, _) }
+      //spans.headOption map { recursiveGetRootMostSpan(idSpan, _) }
+      spans.headOption map { loopGetRootMostSpan(idSpan, _) }
     }
   }
 
@@ -82,6 +84,23 @@ case class Trace(private val s: Seq[Span]) {
     val span = for ( id <- prevSpan.parentId; s <- idSpan.get(id) ) yield
       recursiveGetRootMostSpan(idSpan, s)
     span.getOrElse(prevSpan)
+  }
+
+  private def loopGetRootMostSpan(idSpan: Map[Long, Span], curSpan: Span): Span = {
+    //TODO
+    val checkedSpan: mutable.Set[Long] = mutable.Set()
+    val maxLoop: Int = 3
+
+    for(i <- 1 to maxLoop) {
+      checkedSpan += curSpan.id
+
+      if (checkedSpan.contains(curSpan.parentId.getOrElse(0))) {
+        println("Loop found!")
+        return curSpan
+      }
+
+    }
+    curSpan
   }
 
   /**

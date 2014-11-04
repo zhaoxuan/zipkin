@@ -32,22 +32,30 @@ import com.twitter.zipkin.gen
  *   - the sequence of `LogEntry`s only contains messages we want to pass on (already filtered
  *     by category)
  */
-class ScribeFilter extends Filter[Seq[String], Unit, Span, Unit] {
+//class ScribeFilter extends Filter[Seq[String], Unit, Span, Unit] {
+class ScribeFilter extends Filter[Seq[Seq[String]], Unit, Span, Unit] {
   private val log = Logger.get
 
   val deserializer = new BinaryThriftStructSerializer[gen.Span] {
     def codec = gen.Span
   }
 
-  def apply(logEntries: Seq[String], service: Service[Span, Unit]): Future[Unit] = {
+  //def apply(logEntries: Seq[String], service: Service[Span, Unit]): Future[Unit] = {
+  def apply(logEntries: Seq[Seq[String]], service: Service[Span, Unit]): Future[Unit] = {
     Future.join {
-      logEntries.map { msg =>
+      logEntries.map { entry =>
+        val category  = entry(0)
+        val msg       = entry(1)
         try {
           val span = Stats.time("deserializeSpan") {
             deserializer.fromString(msg)
           }
           log.ifDebug("Processing span: " + span.toSpan + " from " + msg)
-          service(span.toSpan)
+          val spanStruct = span.toSpan
+          service(spanStruct.plusServiceNamePrefix(category match {
+            case "" => ""
+            case s: String => s + ":" }))
+          //service(span.toSpan)
         } catch {
           case e: Exception => {
             // scribe doesn't have any ResultCode.ERROR or similar
