@@ -167,7 +167,7 @@ case class CassandraIndex(
 
 
   def getTraceIdsByAnnotation(service: String, annotation: String, value: Option[ByteBuffer],
-                              endTs: Long, limit: Int, startTs: Long): Future[Seq[IndexedTraceId]] = {
+                              endTs: Long, limit: Int, startTs: Long = 0): Future[Seq[IndexedTraceId]] = {
     CASSANDRA_GET_TRACE_IDS_BY_ANN.incr
 
     // use startTs to query limit
