@@ -1,11 +1,11 @@
 package com.twitter.zipkin.kafka
 
-import java.util.Properties
-
 import com.twitter.zipkin.builder.Builder
 import com.twitter.zipkin.storage.Storage
 import com.twitter.zipkin.storage.kafka.KafkaStorage
-import kafka.producer.{Producer, ProducerConfig}
+import kafka.javaapi.producer.{Producer => jProducer}
+import kafka.producer.ProducerConfig
+import java.util.Properties
 import com.twitter.zipkin.{kafka => outKafka}
 
 /**
@@ -23,14 +23,15 @@ case class StorageBuilder(
     val properties = new Properties
     properties.put("metadata.broker.list", kafkaBroker)
     properties.put("producer.type", "async")
+    properties.put("serializer.class", "kafka.serializer.StringEncoder")
 
     val producerConfig = new ProducerConfig(properties)
 
-    val producerClient = new Producer[String, String](producerConfig)
-    new outKafka.KafkaService(producerClient, topic)
+    val producerClient = new jProducer[String, String](producerConfig)
+    val kafkaService = new outKafka.KafkaService(producerClient, topic)
 
     new KafkaStorage {
-      val producer = producerClient
+      val service = kafkaService
     }
   }
 }
