@@ -28,6 +28,14 @@ class KafkaService(
 
   }
 
+  override def close(): Future[scala.Unit] = {
+    Future {
+      kafka.close
+    } onSuccess { (_) =>
+      println("close kafka service success")
+    }
+  }
+
   def spanFormat(span: Span): String = {
     val data: String = "test data"
     data
