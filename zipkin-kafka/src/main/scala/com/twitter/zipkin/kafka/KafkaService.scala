@@ -1,7 +1,7 @@
 package com.twitter.zipkin.kafka
 
 import com.twitter.finagle.Service
-import com.twitter.util.Future
+import com.twitter.util.{Future, Time}
 import com.twitter.zipkin.common.Span
 import kafka.producer.KeyedMessage
 import kafka.javaapi.producer.Producer
@@ -23,12 +23,12 @@ class KafkaService(
     Future {
       kafka.send(keyMsg)
     } onSuccess { (_) =>
-      println("send to kafka success")
+      println("sended to kafka success")
     }
 
   }
 
-  override def close(): Future[scala.Unit] = {
+  override def close(deadline: Time = Time.now): Future[scala.Unit] = {
     Future {
       kafka.close
     } onSuccess { (_) =>
@@ -37,6 +37,8 @@ class KafkaService(
   }
 
   def spanFormat(span: Span): String = {
+//    TODO:john
+//    format span to json for kafka
     val data: String = "test data"
     data
   }
