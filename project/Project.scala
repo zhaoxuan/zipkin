@@ -393,7 +393,7 @@ object Zipkin extends Build {
       settings = defaultSettings
     ).settings(
       libraryDependencies ++= Seq(
-        "com.twitter"      % "kafka_2.9.2"    % "0.7.0",
+        "org.apache.kafka" % "kafka_2.9.2" % "0.8.1",
         scroogeDep("serializer")
       ) ++ testDependencies,
       resolvers ++= (proxyRepo match {
