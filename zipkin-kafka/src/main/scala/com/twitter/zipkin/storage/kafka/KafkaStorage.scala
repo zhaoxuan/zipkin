@@ -1,26 +1,26 @@
 package com.twitter.zipkin.storage.kafka
 
+import com.twitter.finagle.Service
 import com.twitter.zipkin.common.Span
 import com.twitter.zipkin.storage.Storage
 import com.twitter.util.Future
 import com.twitter.util.Duration
-import kafka.producer.Producer
 
 /**
  * Created by john on 11/3/14.
  */
 
 trait KafkaStorage extends Storage {
-  val producer: Producer[String, String]
+  val service: Service[Span, Unit]
 
-  override def close() = {}
+  override def close() = {
+    service.close()
+  }
 
   override def storeSpan(span: Span): Future[Unit] = {
-    println(producer)
-    println("output span into kafka")
 //    TODO:john
 //    send span to kafka
-    Future.Unit
+    service(span)
   }
 
   override def setTimeToLive(traceId: Long, ttl: Duration): Future[Unit] = {
