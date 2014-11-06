@@ -14,7 +14,7 @@ import com.twitter.zipkin.{kafka => outKafka}
 case class StorageBuilder(
   host: String,
   port: Int,
-  topic: String
+  topic: String = "topic"
 ) extends Builder[Storage] { self =>
 
   def apply() = {
@@ -25,7 +25,7 @@ case class StorageBuilder(
     properties.put("metadata.broker.list", kafkaBroker)
     properties.put("producer.type", "async")
     properties.put("serializer.class", "kafka.serializer.StringEncoder")
-    properties.put("request.required.acks", "1")
+    properties.put("request.required.acks", "0")
 
     val producerConfig = new ProducerConfig(properties)
     val producerClient = new Producer[String, String](producerConfig)
