@@ -35,6 +35,8 @@ object Endpoint {
 case class Endpoint(ipv4: Int, port: Short, serviceName: String)
   extends Ordered[Endpoint] {
 
+  def plusServiceNamePrefix(prefix: String) = this.copy(serviceName = prefix.concat(this.serviceName))
+
   override def toString: String =
     "%s:%d(%s)".format(getHostAddress, port, serviceName)
 

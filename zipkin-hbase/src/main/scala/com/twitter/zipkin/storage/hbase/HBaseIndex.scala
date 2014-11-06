@@ -49,7 +49,7 @@ trait HBaseIndex extends Index {
    * Get the trace ids for this particular service and if provided, span name.
    * Only return maximum of limit trace ids from before the endTs.
    */
-  def getTraceIdsByName(serviceName: String, spanNameOption: Option[String], endTs: Long, limit: Int): Future[Seq[IndexedTraceId]] = {
+  def getTraceIdsByName(serviceName: String, spanNameOption: Option[String], endTs: Long, limit: Int, startTs: Long): Future[Seq[IndexedTraceId]] = {
     val resultsFuture = spanNameOption match {
       case None       => getTraceIdsByNameNoSpanName(serviceName, endTs, limit)
       case Some(spanName) => getTraceIdsByNameWithSpanName(serviceName, spanName, endTs, limit)
@@ -65,7 +65,7 @@ trait HBaseIndex extends Index {
    * both the annotation key and value to be present in index for a match to be returned.
    * Only return maximum of limit trace ids from before the endTs.
    */
-  def getTraceIdsByAnnotation(serviceName: String, annotation: String, value: Option[ByteBuffer], endTs: Long, limit: Int): Future[Seq[IndexedTraceId]] = {
+  def getTraceIdsByAnnotation(serviceName: String, annotation: String, value: Option[ByteBuffer], endTs: Long, limit: Int, startTs: Long): Future[Seq[IndexedTraceId]] = {
     val serviceMappingFuture = serviceMapper.get(serviceName)
     val annoMappingFuture = serviceMappingFuture.flatMap { serviceMapping =>
       serviceMapping.annotationMapper.get(annotation)

@@ -82,29 +82,41 @@ trait RedisIndex extends Index {
   private[redis] def redisJoin(items: String*) = items.mkString(":")
 
   override def getTraceIdsByName(serviceName: String, span: Option[String],
-    endTs: Long, limit: Int): Future[Seq[IndexedTraceId]] =
+    endTs: Long, limit: Int, startTs: Long = 0): Future[Seq[IndexedTraceId]] = {
+    val start_ts = startTs match {
+      case 0 => ttl map (dur => (endTs - dur.inMicroseconds).toDouble)
+      case _ => Some(startTs.toDouble)
+    }
+
     serviceSpanMap.get(
       serviceName,
       span,
-      ttl map (dur => endTs - dur.inMicroseconds),
+      start_ts,
       endTs,
-      limit) map zRangeResultsToSeqIds
+      limit)
+  } map zRangeResultsToSeqIds
 
   override def getTraceIdsByAnnotation(serviceName: String, annotation: String, value: Option[ByteBuffer],
-    endTs: Long, limit: Int): Future[Seq[IndexedTraceId]] = (value match {
+    endTs: Long, limit: Int, startTs: Long): Future[Seq[IndexedTraceId]] = {
+    val start_ts = startTs match {
+      case 0 => ttl map (dur => (endTs - dur.inMicroseconds).toDouble)
+      case _ => Some(startTs.toDouble)
+    }
+
+    value match {
       case Some(anno) =>
         binaryAnnotationsListMap.get(
           redisJoin(serviceName, annotation, ChannelBuffers.copiedBuffer(anno)),
-          (ttl map (dur => (endTs - dur.inMicroseconds).toDouble)).getOrElse(0.0),
+          start_ts.getOrElse(0.0),
           endTs,
           limit)
       case None =>
         annotationsListMap.get(
           redisJoin(serviceName, annotation),
-          (ttl map (dur => (endTs - dur.inMicroseconds).toDouble)).getOrElse(0.0),
+          start_ts.getOrElse(0.0),
           endTs,
           limit)
-    }) map zRangeResultsToSeqIds
+    }} map zRangeResultsToSeqIds
 
   override def getTracesDuration(traceIds: Seq[Long]): Future[Seq[TraceIdDuration]] = Future.collect(
     traceIds map (getTraceDuration(_))
