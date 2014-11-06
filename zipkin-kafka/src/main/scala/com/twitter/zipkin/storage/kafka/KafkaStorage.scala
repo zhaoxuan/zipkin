@@ -18,8 +18,6 @@ trait KafkaStorage extends Storage {
   }
 
   override def storeSpan(span: Span): Future[Unit] = {
-//    TODO:john
-//    send span to kafka
     service(span)
   }
 

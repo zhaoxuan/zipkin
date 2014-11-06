@@ -25,7 +25,7 @@ class KafkaService(
     Future {
       kafka.send(keyMsg)
     } onSuccess { (_) =>
-      println("sended to kafka success")
+      //println("sended to kafka success")
     }
 
   }
@@ -39,8 +39,6 @@ class KafkaService(
   }
 
   def spanFormat(span: Span): String = {
-//    TODO:john
-//    format span to json for kafka
     val jsonGen = json.JSONObject
 //    change millisecond to microsecond
     val response_time = (span.duration.getOrElse(0.toLong) / 1000)
