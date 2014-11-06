@@ -5,6 +5,7 @@ import com.twitter.util.{Future, Time}
 import com.twitter.zipkin.common.Span
 import kafka.producer.KeyedMessage
 import kafka.javaapi.producer.Producer
+import scala.util.parsing.json
 
 
 /**
@@ -16,9 +17,10 @@ class KafkaService(
                     topic: String
                     ) extends Service[Span, Unit] {
 
-  def apply(data: Span): Future[Unit] = {
-    val msg = spanFormat(data)
-    val keyMsg = new KeyedMessage[String, String](topic, msg)
+  def apply(span: Span): Future[Unit] = {
+    val msg = spanFormat(span)
+    val astreamTopic = genTopic(span).getOrElse(topic)
+    val keyMsg = new KeyedMessage[String, String](astreamTopic, msg)
 
     Future {
       kafka.send(keyMsg)
@@ -39,7 +41,25 @@ class KafkaService(
   def spanFormat(span: Span): String = {
 //    TODO:john
 //    format span to json for kafka
-    val data: String = "test data"
-    data
+    val jsonGen = json.JSONObject
+//    change millisecond to microsecond
+    val response_time = (span.duration.getOrElse(0.toLong) / 1000)
+
+    val mapData = Map(
+      "page_view" -> "1",
+      "response_time" -> response_time.toString,
+      "event_time" -> System.currentTimeMillis.toLong,
+      "zipkin_time" -> (span.firstAnnotation.get.timestamp / 1000).toLong
+    )
+
+    jsonGen(mapData).toString()
   }
+
+  def genTopic(span: Span): Option[String] = {
+    val product = span.serviceName.getOrElse("topic_default").toString.split(":")(0)
+    val service = "zipkin"
+    Some("%s_%s_topic".format(product, service).toString)
+  }
+
+
 }
