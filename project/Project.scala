@@ -419,7 +419,8 @@ object Zipkin extends Build {
       base =>
         (base / "config" +++ base / "src" / "test" / "resources").get
     }
-  ).dependsOn(collectorCore, collectorScribe, cassandra, kafka, redis, anormDB, hbase)
+//  ).dependsOn(collectorCore, collectorScribe, cassandra, kafka, redis, anormDB, hbase, receiverKafka)
+    ).dependsOn(collectorCore, collectorScribe, cassandra, kafka, redis, anormDB)
 
   lazy val web =
     Project(
