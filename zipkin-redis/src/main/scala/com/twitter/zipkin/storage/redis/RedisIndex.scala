@@ -97,7 +97,7 @@ trait RedisIndex extends Index {
   } map zRangeResultsToSeqIds
 
   override def getTraceIdsByAnnotation(serviceName: String, annotation: String, value: Option[ByteBuffer],
-    endTs: Long, limit: Int, startTs: Long): Future[Seq[IndexedTraceId]] = {
+    endTs: Long, limit: Int, startTs: Long = 0): Future[Seq[IndexedTraceId]] = {
     val start_ts = startTs match {
       case 0 => ttl map (dur => (endTs - dur.inMicroseconds).toDouble)
       case _ => Some(startTs.toDouble)
