@@ -100,22 +100,24 @@ class QueryService(
     call(method) {
       val serviceName = queryRequest.`serviceName`
       val spanName = queryRequest.`spanName`
+      //val startTs = queryRequest.`startTs`
       val endTs = queryRequest.`endTs`
       val limit = queryRequest.`limit`
       val order = queryRequest.`order`
+      val startTs = queryRequest.`startTs`
 
       val sliceQueries = Seq(
         spanName.map { name =>
-          Seq(SpanSliceQuery(serviceName, name, endTs, 1))
+          Seq(SpanSliceQuery(serviceName, name, endTs, 1, startTs))
         },
         queryRequest.`annotations`.map {
           _.map { a =>
-            AnnotationSliceQuery(serviceName, a, None, endTs, 1)
+            AnnotationSliceQuery(serviceName, a, None, endTs, 1, startTs)
           }
         },
         queryRequest.`binaryAnnotations`.map {
           _.map { b =>
-            AnnotationSliceQuery(serviceName, b.`key`, Some(b.`value`), endTs, 1)
+            AnnotationSliceQuery(serviceName, b.`key`, Some(b.`value`), endTs, 1, startTs)
           }
         }
       ).collect {
@@ -127,7 +129,7 @@ class QueryService(
       sliceQueries match {
         case Nil => {
           /* No queries: get service level traces */
-          index.getTraceIdsByName(serviceName, None, endTs, limit).map {
+          index.getTraceIdsByName(serviceName, None, endTs, limit, startTs).map {
             constructQueryResponse(_, limit, order)
           }.flatten
         }
@@ -207,10 +209,10 @@ class QueryService(
   }
 
   def getTraceIdsBySpanName(serviceName: String, spanName: String, endTs: Long,
-                        limit: Int, order: gen.Order): Future[Seq[Long]] = {
+                        limit: Int, order: gen.Order, startTs: Long): Future[Seq[Long]] = {
     val method = "getTraceIdsBySpanName"
-    log.debug("%s. serviceName: %s spanName: %s endTs: %s limit: %s order: %s".format(method, serviceName, spanName,
-      endTs, limit, order))
+    log.debug("%s. serviceName: %s spanName: %s endTs: %s limit: %s order: %s startTs: %s".format(method, serviceName, spanName,
+      endTs, limit, order, startTs))
     call(method) {
       if (serviceName == null || "".equals(serviceName)) {
         errorStats.counter("%s_no_service".format(method)).incr()
@@ -222,11 +224,12 @@ class QueryService(
 
       FTrace.recordBinary("serviceName", serviceName)
       FTrace.recordBinary("spanName", spanName)
+      FTrace.recordBinary("startTs", startTs)
       FTrace.recordBinary("endTs", endTs)
       FTrace.recordBinary("limit", limit)
       FTrace.recordBinary("order", order)
 
-      val traceIds = index.getTraceIdsByName(serviceName, span, endTs, limit).map {
+      val traceIds = index.getTraceIdsByName(serviceName, span, endTs, limit, startTs).map {
         _.map { _.traceId }
       }
       sortTraceIds(traceIds, limit, order)
@@ -234,7 +237,7 @@ class QueryService(
   }
 
   def getTraceIdsByServiceName(serviceName: String, endTs: Long,
-                               limit: Int, order: gen.Order): Future[Seq[Long]] = {
+                               limit: Int, order: gen.Order, startTs: Long): Future[Seq[Long]] = {
     val method = "getTraceIdsByServiceName"
     log.debug("%s. serviceName: %s endTs: %s limit: %s order: %s".format(method, serviceName, endTs, limit, order))
     call(method) {
@@ -248,7 +251,7 @@ class QueryService(
       FTrace.recordBinary("limit", limit)
       FTrace.recordBinary("order", order)
 
-      val traceIds = index.getTraceIdsByName(serviceName, None, endTs, limit).map {
+      val traceIds = index.getTraceIdsByName(serviceName, None, endTs, limit, startTs).map {
         _.map { _.traceId }
       }
       sortTraceIds(traceIds, limit, order)
@@ -257,7 +260,7 @@ class QueryService(
 
 
   def getTraceIdsByAnnotation(serviceName: String, annotation: String, value: ByteBuffer, endTs: Long,
-                              limit: Int, order: gen.Order): Future[Seq[Long]] = {
+                              limit: Int, order: gen.Order, startTs: Long): Future[Seq[Long]] = {
     val method = "getTraceIdsByAnnotation"
     log.debug("%s. serviceName: %s annotation: %s value: %s endTs: %s limit: %s order: %s".format(method, serviceName,
       annotation, value, endTs, limit, order))
@@ -276,7 +279,7 @@ class QueryService(
       FTrace.recordBinary("limit", limit)
       FTrace.recordBinary("order", order)
 
-      val traceIds = index.getTraceIdsByAnnotation(serviceName, annotation, valueOption, endTs, limit).map {
+      val traceIds = index.getTraceIdsByAnnotation(serviceName, annotation, valueOption, endTs, limit, startTs).map {
         _.map { _.traceId }
       }
       sortTraceIds(traceIds, limit, order)

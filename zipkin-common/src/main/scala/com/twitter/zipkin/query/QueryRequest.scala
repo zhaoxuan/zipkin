@@ -25,7 +25,8 @@ case class QueryRequest(
   binaryAnnotations: Option[Seq[BinaryAnnotation]],
   endTs: Long,
   limit: Int,
-  order: Order
+  order: Order,
+  startTs: Long
 ) {
   def hasAnnotations = {
     (annotations.map { _.length } getOrElse 0) +

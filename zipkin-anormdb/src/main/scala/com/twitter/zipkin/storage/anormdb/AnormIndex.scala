@@ -56,7 +56,7 @@ case class AnormIndex(db: DB, openCon: Option[Connection] = None) extends Index 
    * Only return maximum of limit trace ids from before the endTs.
    */
   def getTraceIdsByName(serviceName: String, spanName: Option[String],
-                        endTs: Long, limit: Int): Future[Seq[IndexedTraceId]] = inNewThread {
+                        endTs: Long, limit: Int, startTs: Long): Future[Seq[IndexedTraceId]] = inNewThread {
     val result:List[(Long, Long)] = SQL(
       """SELECT trace_id, MAX(a_timestamp)
         |FROM zipkin_annotations
@@ -84,7 +84,7 @@ case class AnormIndex(db: DB, openCon: Option[Connection] = None) extends Index 
    * Only return maximum of limit trace ids from before the endTs.
    */
   def getTraceIdsByAnnotation(serviceName: String, annotation: String, value: Option[ByteBuffer],
-                              endTs: Long, limit: Int): Future[Seq[IndexedTraceId]] = inNewThread {
+                              endTs: Long, limit: Int, startTs: Long): Future[Seq[IndexedTraceId]] = inNewThread {
     if ((Constants.CoreAnnotations ++ Constants.CoreAddress).contains(annotation)) {
       Seq.empty
     }

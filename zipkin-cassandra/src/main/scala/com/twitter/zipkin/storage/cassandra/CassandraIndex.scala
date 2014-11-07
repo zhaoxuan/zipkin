@@ -39,7 +39,7 @@ case class CassandraIndex(
   serviceSpanNameIndex: ColumnFamily[String, Long, Long],
   annotationsIndex: ColumnFamily[ByteBuffer, Long, Long],
   durationIndex: ColumnFamily[Long, Long, String],
-  dataTimeToLive: Duration = 3.days
+  dataTimeToLive: Duration = 14.days
 ) extends Index {
 
   def close() {
@@ -137,17 +137,24 @@ case class CassandraIndex(
    */
 
   def getTraceIdsByName(serviceName: String, spanName: Option[String],
-                        endTs: Long, limit: Int): Future[Seq[IndexedTraceId]] = {
+                        endTs: Long, limit: Int, startTs: Long = 0): Future[Seq[IndexedTraceId]] = {
     CASSANDRA_GET_TRACE_IDS_BY_NAME.incr
     // if we have a span name, look up in the service + span name index
     // if not, look up by service name only
+
+    // use startTs to query limit
+    val start_ts = startTs match {
+      case 0 => None
+      case _ => Some(startTs)
+    }
+
     val row = spanName match {
       case Some(span) =>
         val key = serviceName.toLowerCase + "." + span.toLowerCase
-        serviceSpanNameIndex.getRowSlice(key, Some(endTs), None, limit, Order.Reversed)
+        serviceSpanNameIndex.getRowSlice(key, Some(endTs), start_ts, limit, Order.Reversed)
       case None =>
         val key = serviceName.toLowerCase
-        serviceNameIndex.getRowSlice(key, Some(endTs), None, limit, Order.Reversed)
+        serviceNameIndex.getRowSlice(key, Some(endTs), start_ts, limit, Order.Reversed)
     }
 
     // Future[Seq[Column[Long, Long]]] => Future[Seq[IndexedTraceId]]
@@ -160,16 +167,23 @@ case class CassandraIndex(
 
 
   def getTraceIdsByAnnotation(service: String, annotation: String, value: Option[ByteBuffer],
-                              endTs: Long, limit: Int): Future[Seq[IndexedTraceId]] = {
+                              endTs: Long, limit: Int, startTs: Long = 0): Future[Seq[IndexedTraceId]] = {
     CASSANDRA_GET_TRACE_IDS_BY_ANN.incr
+
+    // use startTs to query limit
+    val start_ts = startTs match {
+      case 0 => None
+      case _ => Some(startTs)
+    }
+
     val row = value match {
       case Some(v) => {
         val key = ByteBuffer.wrap(encode(service, annotation).getBytes ++ INDEX_DELIMITER.getBytes ++ Util.getArrayFromBuffer(v))
-        annotationsIndex.getRowSlice(key, Some(endTs), None, limit, Order.Reversed)
+        annotationsIndex.getRowSlice(key, Some(endTs), start_ts, limit, Order.Reversed)
       }
       case None =>
         val key = ByteBuffer.wrap(encode(service, annotation.toLowerCase).getBytes)
-        annotationsIndex.getRowSlice(key, Some(endTs), None, limit, Order.Reversed)
+        annotationsIndex.getRowSlice(key, Some(endTs), start_ts, limit, Order.Reversed)
     }
 
     row map {

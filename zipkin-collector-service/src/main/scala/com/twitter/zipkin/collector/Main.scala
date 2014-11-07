@@ -17,13 +17,14 @@
 package com.twitter.zipkin.collector
 
 import com.twitter.logging.Logger
-import com.twitter.ostrich.admin.{ServiceTracker, RuntimeEnvironment}
+import com.twitter.ostrich.admin.{RuntimeEnvironment, ServiceTracker}
 import com.twitter.util.Eval
-import com.twitter.zipkin.collector.builder.CollectorServiceBuilder
 import com.twitter.zipkin.BuildProperties
+import com.twitter.zipkin.collector.builder.CollectorServiceBuilder
 
 
 object Main {
+
   val log = Logger.get(getClass.getName)
 
   def main(args: Array[String]) {

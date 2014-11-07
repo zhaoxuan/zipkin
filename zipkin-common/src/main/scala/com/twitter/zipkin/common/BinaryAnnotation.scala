@@ -23,4 +23,8 @@ case class BinaryAnnotation(
   value: ByteBuffer,
   annotationType: AnnotationType,
   host: Option[Endpoint]
-)
+) {
+  def plusServiceNamePrefix (prefix: String) = {
+    this.copy(host = this.host.map(_.plusServiceNamePrefix(prefix)))
+  }
+}

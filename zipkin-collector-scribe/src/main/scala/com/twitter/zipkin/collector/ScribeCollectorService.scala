@@ -26,7 +26,8 @@ import com.twitter.zipkin.conversions.thrift._
  * This class implements the log method from the Scribe Thrift interface.
  */
 class ScribeCollectorService(
-  val writeQueue: WriteQueue[Seq[_ <: String]],
+  //val writeQueue: WriteQueue[Seq[_ <: String]],
+  val writeQueue: WriteQueue[Seq[Seq[_ <: String]]],
   val stores: Seq[Store],
   categories: Set[String]
 ) extends gen.ZipkinCollector.FutureIface with CollectorService {
@@ -58,12 +59,18 @@ class ScribeCollectorService(
     val scribeMessages = logEntries.flatMap {
       entry =>
         val category = entry.category.toLowerCase()
-        if (!categories.contains(category)) {
+        //if (!categories.contains(category)) {
+        if (!category.startsWith(categories.head)) {
           Stats.incr("collector.invalid_category")
           None
         } else {
           Stats.incr("category." + category)
-          Some(entry.`message`)
+
+          if (category.length == "zipkin".length) {
+            Some(Seq("", entry.`message`))
+          } else {
+            Some(Seq(category.substring("Zipkin".length() + 1), entry.`message`))
+          }
         }
     }
 

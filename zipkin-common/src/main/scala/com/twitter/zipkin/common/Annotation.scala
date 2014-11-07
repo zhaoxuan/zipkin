@@ -45,4 +45,8 @@ case class Annotation(timestamp: Long, value: String, host: Option[Endpoint], du
     else
       0
   }
+
+  def plusServiceNamePrefix (prefix: String) = {
+    this.copy(host = this.host.map(_.plusServiceNamePrefix(prefix)))
+  }
 }

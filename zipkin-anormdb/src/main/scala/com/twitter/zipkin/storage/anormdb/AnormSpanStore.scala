@@ -249,7 +249,8 @@ class AnormSpanStore(
     serviceName: String,
     spanName: Option[String],
     endTs: Long,
-    limit: Int
+    limit: Int,
+    startTS: Long
   ): Future[Seq[IndexedTraceId]] = pool {
     idsByNameSql
       .on("service_name" -> serviceName)
@@ -300,7 +301,8 @@ class AnormSpanStore(
     annotation: String,
     value: Option[ByteBuffer],
     endTs: Long,
-    limit: Int
+    limit: Int,
+    startTs: Long
   ): Future[Seq[IndexedTraceId]] =
     if (Constants.CoreAnnotations.contains(annotation))
       Future.value(Seq.empty)

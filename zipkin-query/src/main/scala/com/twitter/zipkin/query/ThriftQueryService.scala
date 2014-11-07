@@ -159,6 +159,7 @@ class ThriftQueryService(
       FTrace.recordBinary("endTs", qr.endTs)
       FTrace.recordBinary("limit", qr.limit)
       FTrace.recordBinary("order", qr.order)
+      FTrace.recordBinary("startTs", qr.startTs)
       handle(name)(f)
     }
 
@@ -172,7 +173,7 @@ class ThriftQueryService(
 
       sliceQueries match {
         case Nil =>
-          spanStore.getTraceIdsByName(qr.serviceName, None, qr.endTs, qr.limit) flatMap {
+          spanStore.getTraceIdsByName(qr.serviceName, None, qr.endTs, qr.limit, qr.startTs) flatMap {
             queryResponse(_, qr)
           }
 
@@ -201,11 +202,12 @@ class ThriftQueryService(
     spanName: String,
     endTs: Long,
     limit: Int,
-    order: thrift.Order
+    order: thrift.Order,
+    startTs: Long
   ): Future[Seq[Long]] = {
-    val qr = thrift.QueryRequest(serviceName, opt(spanName), None, None, endTs, limit, order)
+    val qr = thrift.QueryRequest(serviceName, opt(spanName), None, None, endTs, limit, order, startTs)
     handleQuery("getTraceIdsBySpanName", qr) {
-      sort(spanStore.getTraceIdsByName(serviceName, qr.spanName, endTs, limit), limit, order)
+      sort(spanStore.getTraceIdsByName(serviceName, qr.spanName, endTs, limit, startTs), limit, order)
     }
   }
 
@@ -213,11 +215,12 @@ class ThriftQueryService(
     serviceName: String,
     endTs: Long,
     limit: Int,
-    order: thrift.Order
+    order: thrift.Order,
+    startTs: Long
   ): Future[Seq[Long]] = {
-    val qr = thrift.QueryRequest(serviceName, None, None, None, endTs, limit, order)
+    val qr = thrift.QueryRequest(serviceName, None, None, None, endTs, limit, order, startTs)
     handleQuery("getTraceIdsBySpanName", qr) {
-      sort(spanStore.getTraceIdsByName(serviceName, None, endTs, limit), limit, order)
+      sort(spanStore.getTraceIdsByName(serviceName, None, endTs, limit, startTs), limit, order)
     }
   }
 
@@ -227,11 +230,12 @@ class ThriftQueryService(
     value: ByteBuffer,
     endTs: Long,
     limit: Int,
-    order: thrift.Order
+    order: thrift.Order,
+    startTs: Long
   ): Future[Seq[Long]] = {
-    val qr = thrift.QueryRequest(serviceName, None, None, None, endTs, limit, order)
+    val qr = thrift.QueryRequest(serviceName, None, None, None, endTs, limit, order, startTs)
     handleQuery("getTraceIdsByAnnotation", qr) {
-      sort(spanStore.getTraceIdsByAnnotation(serviceName, key, opt(value), endTs, limit), limit, order)
+      sort(spanStore.getTraceIdsByAnnotation(serviceName, key, opt(value), endTs, limit, startTs), limit, order)
     }
   }
 
