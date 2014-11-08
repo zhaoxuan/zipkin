@@ -44,6 +44,7 @@ class KafkaService(
     val response_time = (span.duration.getOrElse(0.toLong) / 1000)
 
     val mapData = Map(
+      "module" -> getModule(span).getOrElse("service"),
       "page_view" -> "1",
       "response_time" -> response_time.toString,
       "event_time" -> System.currentTimeMillis.toLong,
@@ -54,9 +55,18 @@ class KafkaService(
   }
 
   def genTopic(span: Span): Option[String] = {
-    val product = span.serviceName.getOrElse("topic_default").toString.split(":")(0)
+    val product = span.serviceName.getOrElse("default").toString.split(":")(0)
     val service = "zipkin"
     Some("%s_%s_topic".format(product, service).toString)
+  }
+
+  def getModule(span: Span): Option[String] = {
+    val service = span.serviceName.getOrElse("service").split(":")
+    val name = service.size match {
+      case 2 => service(1)
+      case _ => "service"
+    }
+    Some(name)
   }
 
 
