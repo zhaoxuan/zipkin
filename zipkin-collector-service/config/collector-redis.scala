@@ -26,7 +26,7 @@ val redisBuilder = Store.Builder(
 )
 
 val kafkaBuilder = Store.Builder(
-  kafka.StorageBuilder("10.26.107.44", 2181, "topic"),
+  kafka.StorageBuilder("127.0.0.1", 9092, "topic"),
   kafka.IndexBuilder()
 )
 
