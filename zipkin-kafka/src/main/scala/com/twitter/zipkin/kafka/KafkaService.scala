@@ -1,5 +1,7 @@
 package com.twitter.zipkin.kafka
 
+import java.nio.charset.Charset
+
 import com.twitter.finagle.Service
 import com.twitter.util.{Future, Time}
 import com.twitter.zipkin.common.Span
@@ -19,13 +21,13 @@ class KafkaService(
 
   def apply(span: Span): Future[Unit] = {
     val msg = spanFormat(span)
-    val astreamTopic = genTopic(span).getOrElse(topic)
-    val keyMsg = new KeyedMessage[String, String](astreamTopic, msg)
+    val kafkaTopic = genTopic(span).getOrElse(topic)
+    val keyMsg = new KeyedMessage[String, String](kafkaTopic, msg)
 
     Future {
       kafka.send(keyMsg)
     } onSuccess { (_) =>
-      //println("sended to kafka success")
+      //println("send to kafka success")
     }
 
   }
@@ -47,11 +49,29 @@ class KafkaService(
       "module" -> getModule(span).getOrElse("service"),
       "page_view" -> "1",
       "response_time" -> response_time.toString,
-      "event_time" -> System.currentTimeMillis.toLong,
-      "zipkin_time" -> (span.firstAnnotation.get.timestamp / 1000).toLong
+      "event_time" -> System.currentTimeMillis,
+      "zipkin_time" -> (span.firstAnnotation.get.timestamp / 1000)
     )
 
-    jsonGen(mapData).toString()
+    var binaryMap: Map[String, Any] = Map()
+
+    span.binaryAnnotations.foreach( t => {
+      val s = Charset.forName("UTF-8").newDecoder().decode(t.value)
+      val key = t.key.toString
+      val subfix = key.split('.').lastOption match {
+        case Some(s) => s
+        case None => "log"
+        case _ => "log"
+      }
+
+      subfix match {
+        case "log" => ""
+        case _ => binaryMap += key -> s.toString
+      }
+
+    })
+
+    jsonGen(binaryMap ++ mapData).toString()
   }
 
   def genTopic(span: Span): Option[String] = {
