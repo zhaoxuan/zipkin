@@ -15,7 +15,7 @@
  */
 
 import com.twitter.logging._
-import com.twitter.zipkin.builder.Scribe
+import com.twitter.zipkin.builder.{ZipkinServerBuilder, Scribe}
 import com.twitter.zipkin.cassandra
 import com.twitter.zipkin.collector.builder.CollectorServiceBuilder
 import com.twitter.zipkin.storage.Store
@@ -28,7 +28,6 @@ val loggers = List(LoggerFactory(level = Some(Level.INFO),
     append = true,
     formatter = BareFormatter))))
 
-
 val keyspaceBuilder = cassandra.Keyspace.static(nodes = Set("localhost"))
 val cassandraBuilder = Store.Builder(
   cassandra.StorageBuilder(keyspaceBuilder),
@@ -38,4 +37,4 @@ val cassandraBuilder = Store.Builder(
 
 CollectorServiceBuilder(Scribe.Interface(categories = Set("zipkin")))
   .writeTo(cassandraBuilder)
-  .copy(serverBuilder =  ZipkinServerBuilder(9410, 9900).loggers(loggers))
+  //.copy(serverBuilder =  ZipkinServerBuilder(9410, 9900).loggers(loggers))
