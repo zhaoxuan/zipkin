@@ -16,7 +16,8 @@ import scala.util.parsing.json
 
 class KafkaService(
                     kafka: Producer[String, String],
-                    topic: String
+                    topic: String,
+                    service: String = "dtrace"
                     ) extends Service[Span, Unit] {
 
   def apply(span: Span): Future[Unit] = {
@@ -52,7 +53,8 @@ class KafkaService(
       "page_view" -> "1",
       "response_time" -> response_time.toString,
       "event_time" -> System.currentTimeMillis,
-      "zipkin_time" -> (span.firstAnnotation.get.timestamp / 1000)
+      "zipkin_time" -> (span.firstAnnotation.get.timestamp / 1000),
+      "trace_id" -> span.id
     )
 
     var binaryMap: Map[String, Any] = Map()
@@ -70,7 +72,6 @@ class KafkaService(
         case "log" => ""
         case _ => binaryMap += key -> s.toString
       }
-
     })
 
     jsonGen(binaryMap ++ mapData).toString()
@@ -78,7 +79,7 @@ class KafkaService(
 
   def genTopic(span: Span): Option[String] = {
     val product = getProduct(span.serviceName)
-    val service = "dtrace"
+
     Some("%s_%s_topic".format(product, service).toString)
   }
 
