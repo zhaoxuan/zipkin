@@ -17,7 +17,7 @@ import scala.util.parsing.json
 class KafkaService(
                     kafka: Producer[String, String],
                     topic: String,
-                    service: String = "dtrace"
+                    service: String
                     ) extends Service[Span, Unit] {
 
   def apply(span: Span): Future[Unit] = {
