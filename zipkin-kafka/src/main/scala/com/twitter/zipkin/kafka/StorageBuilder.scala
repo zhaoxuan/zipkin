@@ -14,7 +14,8 @@ import com.twitter.zipkin.{kafka => outKafka}
 case class StorageBuilder(
   host: String,
   port: Int,
-  topic: String = "topic"
+  topic: String = "default_dtrace_topic",
+  service: String = "dtrace"
 ) extends Builder[Storage] { self =>
 
   def apply() = {
@@ -29,7 +30,7 @@ case class StorageBuilder(
 
     val producerConfig = new ProducerConfig(properties)
     val producerClient = new Producer[String, String](producerConfig)
-    val kafkaService = new outKafka.KafkaService(producerClient, topic)
+    val kafkaService = new outKafka.KafkaService(producerClient, topic, service)
 
     new KafkaStorage {
       val service = kafkaService
