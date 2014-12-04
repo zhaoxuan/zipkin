@@ -32,7 +32,7 @@ case class IndexBuilder(
   serviceSpanNameIndexCf: String = "ServiceSpanNameIndex",
   annotationsIndexCf: String     = "AnnotationsIndex",
   durationIndexCf: String        = "DurationIndex",
-  dataTimeToLive: Duration = 14.days,
+  dataTimeToLive: Duration = 3.days,
   numBuckets: Int = 10,
   writeConsistency: WriteConsistency = WriteConsistency.One,
   readConsistency: ReadConsistency = ReadConsistency.One

@@ -29,7 +29,7 @@ case class StorageBuilder(
   columnFamily: String = "Traces",
   writeConsistency: WriteConsistency = WriteConsistency.One,
   readConsistency: ReadConsistency = ReadConsistency.One,
-  dataTimeToLive: Duration = 14.days,
+  dataTimeToLive: Duration = 3.days,
   readBatchSize: Int = 500,
   spanCodec: Codec[gen.Span] = new SnappyCodec(new ScroogeThriftCodec[gen.Span](gen.Span))
 ) extends Builder[Storage] {
