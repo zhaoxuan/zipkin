@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 import com.twitter.zipkin.builder.Scribe
-import com.twitter.zipkin.redis
+import com.twitter.zipkin.{cassandra, redis, kafka}
 import com.twitter.zipkin.collector.builder.CollectorServiceBuilder
 import com.twitter.zipkin.storage.Store
-import com.twitter.zipkin.kafka
 
 
 val redisBuilder = Store.Builder(
@@ -26,11 +25,18 @@ val redisBuilder = Store.Builder(
 )
 
 val kafkaBuilder = Store.Builder(
-  kafka.StorageBuilder("127.0.0.1", 9092, "topic"),
+  kafka.StorageBuilder("127.0.0.1", 9092, "default_dtrace_topic"),
   kafka.IndexBuilder()
+)
+val keyspaceBuilder = cassandra.Keyspace.static(nodes = Set("localhost"))
+val cassandraBuilder = Store.Builder(
+  cassandra.StorageBuilder(keyspaceBuilder),
+  cassandra.IndexBuilder(keyspaceBuilder),
+  cassandra.AggregatesBuilder(keyspaceBuilder)
 )
 
 
-
 CollectorServiceBuilder(Scribe.Interface(categories = Set("zipkin")))
-  .writeTo(redisBuilder).writeTo(kafkaBuilder)
+  .writeTo(cassandraBuilder)
+  .writeTo(kafkaBuilder)
+
