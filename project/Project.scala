@@ -23,7 +23,7 @@ import sbtassembly.Plugin._
 import AssemblyKeys._
 
 object Zipkin extends Build {
-  val zipkinVersion = "1.2.0-SNAPSHOT"
+  val zipkinVersion = "1.2.1-SNAPSHOT"
 
   val finagleVersion = "6.16.0"
   val utilVersion = "6.16.0"

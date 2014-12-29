@@ -1,0 +1,3 @@
+# 1.2.1
+* Zipkin-collector-service
+  * Add kafka module for collect service
