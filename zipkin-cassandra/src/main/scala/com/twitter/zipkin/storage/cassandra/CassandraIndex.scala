@@ -39,7 +39,7 @@ case class CassandraIndex(
   serviceSpanNameIndex: ColumnFamily[String, Long, Long],
   annotationsIndex: ColumnFamily[ByteBuffer, Long, Long],
   durationIndex: ColumnFamily[Long, Long, String],
-  dataTimeToLive: Duration = 14.days
+  dataTimeToLive: Duration = 3.days
 ) extends Index {
 
   def close() {
