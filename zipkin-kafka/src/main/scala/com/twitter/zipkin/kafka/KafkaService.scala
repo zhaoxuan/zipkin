@@ -70,6 +70,9 @@ class KafkaService(
 
       subfix match {
         case "log" => ""
+        case "raw" => binaryMap += key -> s
+        case "numeric" => binaryMap += key -> {try {BigDecimal(s.toString) } catch { case _ => 0 }}
+        case "string" => binaryMap += key -> s.toString
         case _ => binaryMap += key -> s.toString
       }
     })
@@ -84,7 +87,12 @@ class KafkaService(
   }
 
   def getProduct(serviceName: Option[String]): String = {
-    serviceName.getOrElse("default").split(":", 2)(0)
+    val product = serviceName.getOrElse("default").split(":", 2)
+    product.length match {
+      case 1 => "default"
+      case 2 => product(0)
+      case _ => "default"
+    }
   }
 
   def getModule(span: Span): Option[String] = {
