@@ -289,7 +289,14 @@ case class CassandraIndex(
           batch.insert(ByteBuffer.wrap(key ++ INDEX_DELIMITER.getBytes ++ Util.getArrayFromBuffer(ba.value)), col)
           batch.insert(ByteBuffer.wrap(key), col)
         }
-        case None =>
+        case None => {
+//          index span without end point
+          WRITE_REQUEST_COUNTER.incr(2)
+          val key = encode(endpoint.serviceName, ba.key).getBytes
+          val col = Column[Long, Long](timestamp, span.traceId).ttl(dataTimeToLive)
+          batch.insert(ByteBuffer.wrap(key ++ INDEX_DELIMITER.getBytes ++ Util.getArrayFromBuffer(ba.value)), col)
+          batch.insert(ByteBuffer.wrap(key), col)
+        }
       }
     }
     val annFuture = batch.execute()
