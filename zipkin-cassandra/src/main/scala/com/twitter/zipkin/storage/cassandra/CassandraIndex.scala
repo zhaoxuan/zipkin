@@ -263,6 +263,17 @@ case class CassandraIndex(
 
     val batch = annotationsIndex.batch
 
+    val serviceName = span.firstAnnotation match {
+      case Some(annotation) => {
+        try {
+          annotation.host.get.serviceName.toLowerCase
+        } catch {
+          case e: UnsupportedOperationException => "dtrace_service"
+        }
+      }
+      case None => "dtrace_service"
+    }
+
     span.annotations.filter { a =>
       // skip core annotations since that query can be done by service name/span name anyway
       !Constants.CoreAnnotations.contains(a.value)
@@ -292,7 +303,7 @@ case class CassandraIndex(
         case None => {
 //          index span without end point
           WRITE_REQUEST_COUNTER.incr(2)
-          val key = encode(endpoint.serviceName, ba.key).getBytes
+          val key = encode(serviceName, ba.key).getBytes
           val col = Column[Long, Long](timestamp, span.traceId).ttl(dataTimeToLive)
           batch.insert(ByteBuffer.wrap(key ++ INDEX_DELIMITER.getBytes ++ Util.getArrayFromBuffer(ba.value)), col)
           batch.insert(ByteBuffer.wrap(key), col)
