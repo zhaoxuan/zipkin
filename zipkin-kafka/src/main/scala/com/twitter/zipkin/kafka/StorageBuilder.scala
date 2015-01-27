@@ -27,7 +27,6 @@ case class StorageBuilder(
     properties.put("producer.type", "async")
     properties.put("serializer.class", "kafka.serializer.StringEncoder")
     properties.put("request.required.acks", "1")
-    properties.put("batch.num.messages", "8")
 
     val producerConfig = new ProducerConfig(properties)
     val producerClient = new Producer[String, String](producerConfig)
