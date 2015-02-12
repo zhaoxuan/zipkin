@@ -32,6 +32,7 @@ class StorageService(storage: Storage) extends Service[Span, Unit] {
       case e => {
         Stats.getCounter("exception_%s_%s".format("storeSpan", e.getClass)).incr()
         log.error(e, "storeSpan")
+        log.error(e.getMessage, "storeSpan")
       }
     }
   }

@@ -40,6 +40,7 @@ class IndexService(index: Index) extends Service[Span, Unit] {
     case e => {
       Stats.getCounter("exception_%s_%s".format(method, e.getClass)).incr()
       log.error(e, method)
+      log.error(e.getMessage, method)
     }
   }
 
