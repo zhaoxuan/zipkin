@@ -22,11 +22,17 @@ import com.twitter.zipkin.storage.Store
 
 
 
-val loggers = List(LoggerFactory(level = Some(Level.INFO),
+val errorLogger = LoggerFactory(level = Some(Level.ERROR),
+  handlers = List(FileHandler(filename = "./logs/zipkin-collector-error.log",
+    rollPolicy = Policy.Daily,
+    append = true,
+    formatter = BareFormatter)))
+
+val infoLogger = LoggerFactory(level = Some(Level.INFO),
   handlers = List(FileHandler(filename = "./logs/zipkin-collector.log",
     rollPolicy = Policy.Daily,
     append = true,
-    formatter = BareFormatter))))
+    formatter = BareFormatter)))
 
 val keyspaceBuilder = cassandra.Keyspace.static(nodes = Set("localhost"))
 val cassandraBuilder = Store.Builder(
@@ -35,6 +41,8 @@ val cassandraBuilder = Store.Builder(
   cassandra.AggregatesBuilder(keyspaceBuilder)
 )
 
-CollectorServiceBuilder(Scribe.Interface(categories = Set("zipkin")))
-  .writeTo(cassandraBuilder)
-  //.copy(serverBuilder =  ZipkinServerBuilder(9410, 9900).loggers(loggers))
+CollectorServiceBuilder(
+  Scribe.Interface(categories = Set("zipkin")),
+  serverBuilder = ZipkinServerBuilder(9410, 9900).addLogger(errorLogger)
+).writeTo(cassandraBuilder)
+
