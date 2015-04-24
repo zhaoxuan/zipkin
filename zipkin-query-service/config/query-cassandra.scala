@@ -18,6 +18,7 @@ import com.twitter.logging._
 import com.twitter.zipkin.builder.QueryServiceBuilder
 import com.twitter.zipkin.cassandra
 import com.twitter.zipkin.storage.Store
+import com.twitter.zipkin.builder.ZipkinServerBuilder;
 
 
 val loggers = List(LoggerFactory(level = Some(Level.INFO),
